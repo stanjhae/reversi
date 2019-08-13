@@ -1,0 +1,110 @@
+#include <stdio.h>
+
+
+int row = 0, col = 0, maxMoves = 4;
+void * levels[5][2] = { //levels for the game
+        {"1", "Human"},
+        {"2", "AI (Easy)"},
+        {"3", "AI (Medium)"},
+        {"4", "AI (Hard)"},
+        {"5", "AI (Very Hard)"},
+};
+
+char board[8][8];
+
+void printBoard (){
+    for(int row = 0; row<9; row++){
+        if(row != 0){ //if first row do not print number of row.
+            printf("%d", row);
+        }
+        for(int col = 0; col<9; col++){
+            if(row == 0){ //if first row
+                if(col !=0){ //and not first column
+                    printf("%d\t", col); //print number of column
+                }else{
+                    printf("\t"); //if firs[t column, print space
+                }
+            }else{ //if second to ninth row
+                if(col !=0) { //if not the first column
+                    if(board[row][col] == 'x'){ //if point in board is equal to x
+                        printf("x\t"); //print x
+                    }else if(board[row][col] == 'o'){ //if point in board is equal to o
+                        printf("o\t"); //print o
+                    }else{
+                        printf(".\t"); //print .
+                    }
+                }else{ //if first column
+                    printf("\t"); //print space
+                }
+            }
+        }
+        printf("\n\n");
+    }
+}
+
+int main() {
+
+    board[4][4] = 'x';
+    board[4][5] = 'o';
+    board[5][4] = 'o';
+    board[5][5] = 'x';
+
+    int player1 = 1, player2 = 1; //define players
+
+    printf("\nWelcome To Reversi\n\n");
+
+    for(int i=0; i<5; i++){ //printing the levels
+        printf("%s: %s \n", levels[i][0],levels[i][1]);
+    }
+
+    do{
+        printf("\n");
+        if(player1 < 1 || player1 > 5) printf("Level must be between 1 and 5.\n");
+        printf("Choose Level for player 1: ");
+        scanf("%d", &player1);
+    }while(player1 < 1 || player1 > 5);
+
+    do{
+        printf("\n");
+        if(player2 < 1 || player2 > 5) printf("Level must be between 1 and 5.\n");
+        printf("Choose Level for player 2: ");
+        scanf("%d", &player2);
+    }while(player2 < 1 || player2 > 5);
+
+
+//    Logic for selecting player level
+//    printf("Choose Level for player 2: ");
+//    scanf("%d", &player2);
+//    while(player2 < 1 || player2 > 5){
+//        printf("Level must be between 1 and 5.\n");
+//        printf("Choose Level for player 2: ");
+//        scanf("%d", &player2);
+//    }
+
+    printf("\n%s vs %s\n\n", levels[player1-1][1], levels[player2-1][1]); //displays who vs who
+
+    printBoard();
+
+    while(maxMoves){
+        printf("Player 1 move: ");
+        scanf("%d, %d", &row, &col); //getting the player's move (row,col)
+
+        board[row][col] = 'x'; //assign x to player's move
+
+        printBoard(); //print updated board
+
+        printf("Player 2 move: ");
+        scanf("%d, %d", &row, &col);
+
+        board[row][col] = 'o';
+
+        printBoard();
+
+        maxMoves -= 2; //decrements mmaxMoves by 2 on each play.
+
+    }
+
+    printf("GAME OVER!!");
+
+    return 0;
+}
