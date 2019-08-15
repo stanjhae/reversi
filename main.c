@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 
-int row = 0, col = 0, maxMoves = 4;
+int row = 0, col = 0, occupied;
 void * levels[5][2] = { //levels for the game
         {"1", "Human"},
         {"2", "AI (Easy)"},
@@ -40,6 +40,43 @@ void printBoard (){
         }
         printf("\n\n");
     }
+}
+
+int checkOccupied(row, col){
+    if(board[row][col] == 'x' || board[row][col] == 'o'){ //if spot is occupied
+        printf("This spot is occupied");
+        return 2; //throws an occupied error
+    }else{
+        int found = 0;
+        int opposite = 0;
+        for(int r = row-1; r <= row+1; r++){ //if spot is not occupied
+
+            for(int c = col-1; c <= col+1; c++){ //check the spots around a given point
+
+                if((board[r][c] == 'x') || (board[r][c] == 'o')){ //if any spot around the given point is occupied
+                    found++; //increment found
+                    printf("%c\n", board[r][c]);
+                    if(board[r][c] == 'o'){ //for player 'x', check if neighbour is opposite 'o'
+                        opposite++; //increment opposite
+                    }
+                }else{ //if no spot around is occupied
+                    continue; //continue to next column
+                }
+            }
+            if(found == 0){ //at end of row, check if any spot is occupied
+                if(r == row+1){ //if it is the last row
+                    printf("No characters around this spot.");
+                    return 3; //throws a no spot around given point is a occupied error
+                }
+            }
+        }
+        if(opposite == 0){ //if no neighbour of opposite disc
+            printf("No opposite disc around this spot");
+            return 4; //throws a no neighbour of opposite disc error
+        }
+    }
+
+    return 0;
 }
 
 int main() {
@@ -85,24 +122,37 @@ int main() {
 
     printBoard();
 
-    while(maxMoves){
-        printf("Player 1 move: ");
-        scanf("%d, %d", &row, &col); //getting the player's move (row,col)
+//    while(maxMoves){
+//        printf("Player 1 move: ");
+//        scanf("%d, %d", &row, &col); //getting the player's move (row,col)
+//
+//        board[row][col] = 'x'; //assign x to player's move
+//
+//        printBoard(); //print updated board
+//
+//        printf("Player 2 move: ");
+//        scanf("%d, %d", &row, &col);
+//
+//        board[row][col] = 'o';
+//
+//        printBoard();
+//
+//        maxMoves -= 2; //decrements mmaxMoves by 2 on each play.
+//
+//    }
 
-        board[row][col] = 'x'; //assign x to player's move
+    printf("Player 1 move: ");
+    scanf("%d, %d", &row, &col); //getting the player's move (row,col)
 
-        printBoard(); //print updated board
+    occupied = checkOccupied(row, col);
 
-        printf("Player 2 move: ");
-        scanf("%d, %d", &row, &col);
-
-        board[row][col] = 'o';
-
-        printBoard();
-
-        maxMoves -= 2; //decrements mmaxMoves by 2 on each play.
-
+    if(occupied != 0){
+        return occupied;
     }
+
+    board[row][col] = 'x'; //assign x to player's move
+
+    printBoard(); //print updated board
 
     printf("GAME OVER!!");
 
