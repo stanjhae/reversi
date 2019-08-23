@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
+int playerRow = 0, playerCol = 0, occupied, foundByAi = 0;
 
-int playerRow = 0, playerCol = 0, occupied;
 void *levels[5][2] = { //levels for the game
         {"1", "Human"},
         {"2", "AI (Easy)"},
@@ -51,7 +53,7 @@ void printBoard() {
     printf("X: %d,\t O: %d\n", x, o); //print result
 }
 
-int checkExtSpot(r, c, row, col, player) {
+int checkExtSpot(r, c, row, col, player, ai) {
     char x = 'x', o = 'o';
     if (player == 2) {
         x = 'o', o = 'x';
@@ -73,6 +75,7 @@ int checkExtSpot(r, c, row, col, player) {
                 board[row][reverseCol - 1] = x;
                 reverseCol--;
             }
+            foundByAi++;
         } else if (board[row][col + 2] == o) {
             printf("Found o at row:%d, col:%d\n", row, col + 2);
             checkExtSpot(r, c + 1, row, col + 1, player);
@@ -87,6 +90,7 @@ int checkExtSpot(r, c, row, col, player) {
                 board[row][reverseCol + 1] = x;
                 reverseCol++;
             }
+            foundByAi++;
         } else if (board[row][col - 2] == o) {
             printf("Found o at row:%d, col:%d\n", row, col - 2);
             checkExtSpot(r, c - 1, row, col - 1, player);
@@ -102,7 +106,7 @@ int checkExtSpot(r, c, row, col, player) {
                 board[reverseRow + 1][col] = x;
                 reverseRow++;
             }
-
+            foundByAi++;
         } else if (board[row - 2][col] == o) {
             printf("Found o at row:%d, col:%d\n", row - 2, col);
             checkExtSpot(r - 1, c, row - 1, col, player);
@@ -120,6 +124,7 @@ int checkExtSpot(r, c, row, col, player) {
                 reverseRow++; //increase or reduce row
                 reverseCol++; //increase or reduce col
             }
+            foundByAi++;
         } else if (board[row - 2][col - 2] == o) {
             printf("Found o at row:%d, col:%d\n", row - 2, col - 2);
             checkExtSpot(r - 1, c - 1, row - 1, col - 1, player);
@@ -137,6 +142,7 @@ int checkExtSpot(r, c, row, col, player) {
                 reverseRow++;
                 reverseCol--;
             }
+            foundByAi++;
         } else if (board[row - 2][col + 2] == o) {
             printf("Found o at row:%d, col:%d\n", row - 2, col + 2);
             checkExtSpot(r - 1, c + 1, row - 1, col + 1, player);
@@ -154,6 +160,7 @@ int checkExtSpot(r, c, row, col, player) {
                 reverseRow--;
                 reverseCol++;
             }
+            foundByAi++;
         } else if (board[row + 2][col - 2] == o) {
             printf("Found o at row:%d, col:%d\n", row + 2, col - 2);
             checkExtSpot(r + 1, c - 1, row + 1, col + 1, player);
@@ -171,6 +178,7 @@ int checkExtSpot(r, c, row, col, player) {
                 reverseRow--;
                 reverseCol--;
             }
+            foundByAi++;
         } else if (board[row + 2][col + 2] == o) {
             printf("Found o at row:%d, col:%d\n", row - 2, col + 2);
             checkExtSpot(r + 1, c + 1, row + 1, col + 1, player);
@@ -186,6 +194,7 @@ int checkExtSpot(r, c, row, col, player) {
                 board[reverseRow - 1][col] = x;
                 reverseRow--;
             }
+            foundByAi++;
         } else if (board[row + 2][col] == o) {
             printf("Found o at row:%d, col:%d\n", row + 2, col);
             checkExtSpot(r + 1, c, row + 1, col, player);
@@ -197,14 +206,14 @@ int checkExtSpot(r, c, row, col, player) {
 
 }
 
-int checkOccupied(row, col, player) {
+int checkOccupied(row, col, player, ai) {
     char x = 'x', o = 'o';
     if (player == 2) {
         x = 'o', o = 'x';
     }
 
     if (board[row][col] == x || board[row][col] == o) { //if spot is occupied
-        printf("This spot is occupied");
+//        printf("This spot is occupied");
         return 2; //throws an occupied error
     } else {
         int found = 0;
@@ -220,7 +229,7 @@ int checkOccupied(row, col, player) {
                     if (board[r][c] == o) { //for player x, check if neighbour is opposite o
                         opposite++; //increment opposite
 
-                        checkExtSpot(r, c, row, col, player);
+                        checkExtSpot(r, c, row, col, player, ai);
                         rounds++;
 //                        if(board[r][c+1] == x){
 //                            printf("Found X at row:%d, col:%d\n", r, c+1);
@@ -235,14 +244,14 @@ int checkOccupied(row, col, player) {
             }
             if (found == 0) { //at end of row, check if any spot is occupied
                 if (r == row + 1) { //if it is the last row
-                    printf("No characters around this spot.");
+//                    printf("No characters around this spot.");
                     return 3; //throws a no spot around given point is a occupied error
                 }
             }
         }
         printf("\nopposite: %d\n", opposite);
         if (opposite == 0) { //if no neighbour of opposite disc
-            printf("No opposite disc around this spot");
+//            printf("No opposite disc around this spot");
             return 4; //throws a no neighbour of opposite disc error
         }
     }
@@ -251,6 +260,8 @@ int checkOccupied(row, col, player) {
 }
 
 int main() {
+    srand(time(0));   // Initialization, should only be called once.
+
     int play = 1;
 
     board[4][4] = 'x';
@@ -330,18 +341,46 @@ int main() {
 
         printBoard(); //print updated board
 
-        printf("Player 2 move: ");
-        scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
+//        int random = rand()%2;
+//        printf("random:%d\n", random);
 
-        occupied = checkOccupied(playerRow, playerCol, 2);
-
-        if (occupied != 0) {
-            return occupied;
+        foundByAi = 0;
+//        int temp = 0;
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+//                if(temp == 0 && random == 1){
+//                    temp = r;
+//                    r = c;
+//                    c = temp;
+//                }
+                playerRow = r;
+                playerCol = c;
+                printf("number: %d. ai:%d\n", r * c, foundByAi);
+                checkOccupied(r, c, 2, 1);
+                if (foundByAi > 0) {
+                    board[playerRow][playerCol] = 'o';
+                    break;
+                }
+            }
+            if (foundByAi != 0) {
+                break;
+            }
         }
 
-        board[playerRow][playerCol] = 'o'; //assign x to player's move
-
         printBoard(); //print updated board
+
+//        printf("Player 2 move: ");
+//        scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
+//
+//        occupied = checkOccupied(playerRow, playerCol, 2);
+//
+//        if (occupied != 0) {
+//            return occupied;
+//        }
+//
+//        board[playerRow][playerCol] = 'o'; //assign x to player's move
+//
+//        printBoard(); //print updated board
 
     }
     printf("GAME OVER!!");
