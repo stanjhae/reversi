@@ -67,7 +67,9 @@ int checkExtSpot(r, c, row, col, player, ai) {
     int rowDiff = r - row; //finds row difference between possible flip and actual move
     int colDiff = c - col; //finds col difference between possible flip and actual move
 
-    if (rowDiff == 0 && colDiff > 0) { //if same row but checking right col [0,2]
+    if (rowDiff == 0 && colDiff > 0) {//if same row but checking right col [0,2]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
+
         if (board[row][col + 2] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row, col + 2);
             int reverseCol = col + 2;
@@ -83,6 +85,7 @@ int checkExtSpot(r, c, row, col, player, ai) {
             printf("No X at row:%d, col:%d\n", row, col + 2);
         }
     } else if (rowDiff == 0 && colDiff < 0) { //if same row but checking left col [0,-2]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row][col - 2] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row, col - 2);
             int reverseCol = col - 2;
@@ -99,6 +102,7 @@ int checkExtSpot(r, c, row, col, player, ai) {
 //                                    return 5; //throws a no flip possible error
         }
     } else if (rowDiff < 0 && colDiff == 0) { //if same col but checking top row [-2,0]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row - 2][col] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row - 2, col);
             int reverseRow = row - 2;
@@ -115,6 +119,7 @@ int checkExtSpot(r, c, row, col, player, ai) {
 //                                    return 5; //throws a no flip possible error
         }
     } else if (rowDiff < 0 && colDiff < 0) { //if same col but checking top row [-2,-2]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row - 2][col - 2] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row - 2, col - 2);
             int reverseRow = row - 2; //Get row where X or O is found
@@ -133,6 +138,7 @@ int checkExtSpot(r, c, row, col, player, ai) {
 //                                    return 5; //throws a no flip possible error
         }
     } else if (rowDiff < 0 && colDiff > 0) { //[-2,+2]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row - 2][col + 2] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row - 2, col + 2);
             int reverseRow = row - 2;
@@ -151,6 +157,7 @@ int checkExtSpot(r, c, row, col, player, ai) {
 //                                    return 5; //throws a no flip possible error
         }
     } else if (rowDiff > 0 && colDiff < 0) { //[2,-2]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row + 2][col - 2] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row + 2, col - 2);
             int reverseRow = row + 2;
@@ -164,11 +171,13 @@ int checkExtSpot(r, c, row, col, player, ai) {
         } else if (board[row + 2][col - 2] == o) {
             printf("Found o at row:%d, col:%d\n", row + 2, col - 2);
             checkExtSpot(r + 1, c - 1, row + 1, col + 1, player);
+//            checkExtSpot(r + 1, c - 1, row + 1, col + 1, player);
         } else {
             printf("No X at row:%d, col:%d\n", row + 2, col - 2);
 //                                    return 5; //throws a no flip possible error
         }
     } else if (rowDiff > 0 && colDiff > 0) { //[2,2]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row + 2][col + 2] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row + 2, col + 2);
             int reverseRow = row + 2;
@@ -187,6 +196,7 @@ int checkExtSpot(r, c, row, col, player, ai) {
 //                                    return 5; //throws a no flip possible error
         }
     } else if (rowDiff > 0 && colDiff == 0) { //if same col but checking bottom row [2,0]
+        printf("rowDiff: %d colDiff: %d\n", rowDiff, colDiff);
         if (board[row + 2][col] == x) { //if spot contains opposite disc (x)
             printf("Found X at row:%d, col:%d\n", row + 2, col);
             int reverseRow = row + 2;
@@ -262,7 +272,7 @@ int checkOccupied(row, col, player, ai) {
 int main() {
     srand(time(0));   // Initialization, should only be called once.
 
-    int play = 1;
+    int play = 20;
 
     board[4][4] = 'x';
     board[4][5] = 'o';
@@ -325,40 +335,32 @@ int main() {
 //    }
 
     while (play) { //Continue playing until play becomes false.
-        printf("Player 1 move: ");
-        scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
-
-        if (playerRow == '9') {
-            break;
-        }
-        occupied = checkOccupied(playerRow, playerCol, 1);
-
-        if (occupied != 0) {
-            return occupied;
-        }
-
-        board[playerRow][playerCol] = 'x'; //assign x to player's move
-
-        printBoard(); //print updated board
-
-//        int random = rand()%2;
-//        printf("random:%d\n", random);
+//        printf("Player 1 move: ");
+//        scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
+//
+//        if (playerRow == '9') {
+//            break;
+//        }
+//        occupied = checkOccupied(playerRow, playerCol, 1);
+//
+//        if (occupied != 0) {
+//            return occupied;
+//        }
+//
+//        board[playerRow][playerCol] = 'x'; //assign x to player's move
+//
+//        printBoard(); //print updated board
 
         foundByAi = 0;
-//        int temp = 0;
         for (int r = 1; r < 9; r++) {
             for (int c = 1; c < 9; c++) {
-//                if(temp == 0 && random == 1){
-//                    temp = r;
-//                    r = c;
-//                    c = temp;
-//                }
+                printf("before flip: row:%d. col:%d.\n", r, c);
                 playerRow = r;
                 playerCol = c;
-                printf("number: %d. ai:%d\n", r * c, foundByAi);
-                checkOccupied(r, c, 2, 1);
+                printf("after flip: row:%d. col:%d.\n\n", r, c);
+                checkOccupied(r, c, 1);
                 if (foundByAi > 0) {
-                    board[playerRow][playerCol] = 'o';
+                    board[playerRow][playerCol] = 'x';
                     break;
                 }
             }
@@ -367,8 +369,51 @@ int main() {
             }
         }
 
-        printBoard(); //print updated board
+        printBoard();
 
+        foundByAi = 0;
+
+        int random = rand() % 2;
+        printf("random:%d\n", random);
+
+        if (random < 2) {
+            for (int r = 1; r < 9; r++) {
+                for (int c = 1; c < 9; c++) {
+                    printf("before flip: row:%d. col:%d.\n", r, c);
+                    playerRow = random == 0 ? r : c;
+                    playerCol = random == 0 ? c : r;
+                    printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
+                    checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 2);
+                    if (foundByAi > 0) {
+                        board[playerRow][playerCol] = 'o';
+                        break;
+                    }
+                }
+                if (foundByAi != 0) {
+                    break;
+                }
+            }
+        } else {
+            for (int r = 8; r > 0; r--) {
+                for (int c = 8; c > 0; c--) {
+                    printf("before flip: row:%d. col:%d.\n", r, c);
+                    playerRow = random == 2 ? r : c;
+                    playerCol = random == 2 ? c : r;
+                    printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
+                    checkOccupied(random == 0 ? r : c, random == 2 ? c : r, 2);
+                    if (foundByAi > 0) {
+                        board[playerRow][playerCol] = 'o';
+                        break;
+                    }
+                }
+                if (foundByAi != 0) {
+                    break;
+                }
+            }
+        }
+
+        printBoard(); //print updated board
+        play--;
 //        printf("Player 2 move: ");
 //        scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
 //
