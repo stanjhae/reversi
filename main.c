@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-int playerRow = 0, playerCol = 0, occupied, foundByAi = 0;
+int playerRow = 0, playerCol = 0, occupied, foundByAi = 0, flips = 0, maxFlips = 0, flipRow, flipCol, flip = 0;
 
 void *levels[5][2] = { //levels for the game
         {"1", "Human"},
@@ -80,7 +80,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             printf("Found X at row:%d, col:%d\n", row, col + colTwo);
             int reverseCol = col + colTwo;
             while (reverseCol != playerCol) {
-                board[row][reverseCol - 1] = x;
+                flips++;
+                flip ? board[row][reverseCol - 1] = x : NULL;
                 reverseCol--;
             }
             foundByAi++;
@@ -100,7 +101,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             printf("Found X at row:%d, col:%d\n", row, col - colTwo);
             int reverseCol = col - colTwo;
             while (reverseCol != playerCol) {
-                board[row][reverseCol + 1] = x;
+                flips++;
+                flip ? board[row][reverseCol + 1] = x : NULL;
                 reverseCol++;
             }
             foundByAi++;
@@ -117,7 +119,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             printf("Found X at row:%d, col:%d\n", row - rowTwo, col);
             int reverseRow = row - rowTwo;
             while (reverseRow != playerRow) {
-                board[reverseRow + 1][col] = x;
+                flips++;
+                flip ? board[reverseRow + 1][col] = x : NULL;
                 reverseRow++;
             }
             foundByAi++;
@@ -135,7 +138,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             int reverseRow = row - rowTwo; //Get row where X or O is found
             int reverseCol = col - colTwo; //Get col where X or O is found
             while (reverseCol != playerCol) { //we loop until we get to initial play
-                board[reverseRow + 1][reverseCol + 1] = x; //change every character
+                flips++;
+                flip ? board[reverseRow + 1][reverseCol + 1] = x : NULL; //change every character
                 reverseRow++; //increase or reduce row
                 reverseCol++; //increase or reduce col
             }
@@ -154,7 +158,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             int reverseRow = row - rowTwo;
             int reverseCol = col + colTwo;
             while (reverseCol != playerCol) {
-                board[reverseRow + 1][reverseCol - 1] = x;
+                flips++;
+                flip ? board[reverseRow + 1][reverseCol - 1] = x : NULL;
                 reverseRow++;
                 reverseCol--;
             }
@@ -176,7 +181,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             int reverseRow = row + rowTwo;
             int reverseCol = col - colTwo;
             while (reverseCol != playerCol) {
-                board[reverseRow - 1][reverseCol + 1] = x;
+                flips++;
+                flip ? board[reverseRow - 1][reverseCol + 1] = x : NULL;
                 reverseRow--;
                 reverseCol++;
             }
@@ -199,7 +205,9 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             int reverseRow = row + rowTwo;
             int reverseCol = col + colTwo;
             while (reverseCol != playerCol) {
-                board[reverseRow - 1][reverseCol - 1] = x;
+                printf("Flippppping!!!!!\n");
+                flips++;
+                flip ? board[reverseRow - 1][reverseCol - 1] = x : NULL;
                 reverseRow--;
                 reverseCol--;
             }
@@ -220,7 +228,8 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             printf("Found X at row:%d, col:%d\n", row + rowTwo, col);
             int reverseRow = row + rowTwo;
             while (reverseRow != playerRow) {
-                board[reverseRow - 1][col] = x;
+                flips++;
+                flip ? board[reverseRow - 1][col] = x : NULL;
                 reverseRow--;
             }
             foundByAi++;
@@ -262,6 +271,7 @@ int checkOccupied(row, col, player, direction) {
                         opposite++; //increment opposite
 
                         checkExtSpot(r, c, row, col, player, direction);
+
                         rounds++;
 //                        if(board[r][c+1] == x){
 //                            printf("Found X at row:%d, col:%d\n", r, c+1);
@@ -297,9 +307,14 @@ int main() {
     int play = 20;
 
     board[4][4] = 'x';
-    board[4][5] = 'o';
+    board[4][5] = 'x';
     board[5][4] = 'o';
     board[5][5] = 'x';
+    board[3][4] = 'x';
+    board[5][6] = 'x';
+    board[6][7] = 'o';
+    board[3][2] = 'x';
+    board[4][1] = 'o';
 
     int player1 = 1, player2 = 1; //define players
 
@@ -344,11 +359,15 @@ int main() {
                 return occupied;
             }
 
+            flip = 1;
+            checkOccupied(playerRow, playerCol, 1, 0);
+            flip = 0;
             board[playerRow][playerCol] = 'x'; //assign x to player's move
 
             printBoard(); //print updated board
         } else {
-            int random = rand() % 4;
+//            int random = rand() % 4;
+            int random = 0;
             printf("random:%d\n", random);
 
             if (random < 2) {
@@ -411,7 +430,8 @@ int main() {
 
             printBoard(); //print updated board
         } else {
-            int random = rand() % 4;
+//            int random = rand() % 4;
+            int random = 0;
             printf("random:%d\n", random);
 
             if (random < 2) {
@@ -422,6 +442,13 @@ int main() {
                         playerCol = random == 0 ? c : r;
                         printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
                         checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 2, 0);
+                        printf("flips:%d\n", flips);
+                        if (flips > maxFlips) {
+                            maxFlips = flips;
+                            flipRow = r;
+                            flipCol = c;
+                        }
+                        flips = 0;
 //                        if (foundByAi > 0) {
 //                            board[playerRow][playerCol] = 'o';
 //                            break;
@@ -451,9 +478,15 @@ int main() {
                 }
             }
 
+            printf("max flips:%d row:%d col:%d\n", maxFlips, flipRow, flipCol);
+            if (maxFlips > 0) {
+                flip = 1;
+                playerRow = flipRow;
+                playerCol = flipCol;
+                checkOccupied(flipRow, flipCol, 2, 0);
+            }
             printBoard(); //print updated board
         }
-//
 //        foundByAi = 0;
 //        for (int r = 1; r < 9; r++) {
 //            for (int c = 1; c < 9; c++) {
