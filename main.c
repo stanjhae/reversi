@@ -166,6 +166,9 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             foundByAi++;
         } else if (board[row - rowTwo][col + rowTwo] == o) {
             printf("Found o at row:%d, col:%d\n", row - rowTwo, col + colTwo);
+            if (direction == 1) {
+                rowOne = -rowOne;
+            }
             if (direction == 2) {
                 colOne = -colOne;
             }
@@ -217,6 +220,9 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
             if (direction == 1) {
                 rowOne = -rowOne;
             }
+            if (direction == 2) {
+                colOne = -colOne;
+            }
             checkExtSpot(r + rowOne, c + colOne, row + rowOne, col + colOne, player, direction);
         } else {
             printf("No X at row:%d, col:%d\n", row + rowTwo, col + colTwo);
@@ -244,7 +250,6 @@ int checkExtSpot(r, c, row, col, player, direction) { //checks the direction we'
 //                                    return 5; //throws a no flip possible error
         }
     }
-
 }
 
 int checkOccupied(row, col, player, direction) {
@@ -315,6 +320,8 @@ int main() {
     board[6][7] = 'o';
     board[3][2] = 'x';
     board[4][1] = 'o';
+    board[1][4] = 'x';
+    board[1][5] = 'o';
 
     int player1 = 1, player2 = 1; //define players
 
@@ -344,7 +351,7 @@ int main() {
     printBoard();
 
     while (play) { //Continue playing until play becomes false.
-
+        flip = 0;
         printf("Player 1 move: ");
 
         if (player1 == 1) {
@@ -366,8 +373,8 @@ int main() {
 
             printBoard(); //print updated board
         } else {
-//            int random = rand() % 4;
-            int random = 0;
+            int random = rand() % 4;
+//            int random = 0;
             printf("random:%d\n", random);
 
             if (random < 2) {
@@ -429,9 +436,55 @@ int main() {
             board[playerRow][playerCol] = 'o'; //assign x to player's move
 
             printBoard(); //print updated board
-        } else {
-//            int random = rand() % 4;
-            int random = 0;
+        } else if (player2 == 2) {
+            flips = 0;
+            int random = rand() % 4;
+//            int random = 3;
+            printf("random:%d\n", random);
+
+            flip = 1;
+            if (random < 2) {
+                for (int r = 1; r < 9; r++) {
+                    for (int c = 1; c < 9; c++) {
+                        printf("before flip: row:%d. col:%d.\n", r, c);
+                        playerRow = random == 0 ? r : c;
+                        playerCol = random == 0 ? c : r;
+                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
+                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 2, 0);
+                        if (foundByAi > 0) {
+                            board[playerRow][playerCol] = 'o';
+                            printBoard(); //print updated board
+                            break;
+                        }
+                    }
+                    if (foundByAi != 0) {
+                        break;
+                    }
+                }
+            } else {
+                for (int r = 8; r > 0; r--) {
+                    for (int c = 8; c > 0; c--) {
+                        printf("before flip: row:%d. col:%d.\n", r, c);
+                        playerRow = random == 2 ? r : c;
+                        playerCol = random == 2 ? c : r;
+                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
+                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 2, random == 2 ? 2 : 1);
+                        if (foundByAi > 0) {
+                            printf("playerRow:%d, playerCol:%d\n", playerRow, playerCol);
+                            board[playerRow][playerCol] = 'o';
+                            printBoard(); //print updated board
+                            break;
+                        }
+                    }
+                    if (foundByAi != 0) {
+                        break;
+                    }
+                }
+            }
+        } else if (player2 == 3) {
+            flips = 0;
+            int random = rand() % 4;
+//            int random = 3;
             printf("random:%d\n", random);
 
             if (random < 2) {
@@ -445,18 +498,11 @@ int main() {
                         printf("flips:%d\n", flips);
                         if (flips > maxFlips) {
                             maxFlips = flips;
-                            flipRow = r;
-                            flipCol = c;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
                         }
                         flips = 0;
-//                        if (foundByAi > 0) {
-//                            board[playerRow][playerCol] = 'o';
-//                            break;
-//                        }
                     }
-//                    if (foundByAi != 0) {
-//                        break;
-//                    }
                 }
             } else {
                 for (int r = 8; r > 0; r--) {
@@ -466,15 +512,13 @@ int main() {
                         playerCol = random == 2 ? c : r;
                         printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
                         checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 2, random == 2 ? 2 : 1);
-//                        if (foundByAi > 0) {
-//                            printf("playerRow:%d, playerCol:%d\n", playerRow, playerCol);
-//                            board[playerRow][playerCol] = 'o';
-//                            break;
-//                        }
+                        if (flips > maxFlips) {
+                            maxFlips = flips;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        }
+                        flips = 0;
                     }
-//                    if (foundByAi != 0) {
-//                        break;
-//                    }
                 }
             }
 
