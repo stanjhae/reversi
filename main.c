@@ -2,16 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-int playerRow = 0, playerCol = 0, occupied, foundByAi = 0, flips = 0, maxFlips = 0, flipRow, flipCol, flip = 0, edge = 0;
+int playerRow = 0, playerCol = 0, occupied = 0, foundByAi = 0, flips = 0, maxFlips = 0, flipRow, flipCol, flip = 0, edge = 0;
 
 void *levels[5][2] = { //levels for the game
         {"1", "Human"},
         {"2", "AI (Easy)"},
         {"3", "AI (Medium)"},
         {"4", "AI (Hard)"},
-        {"5", "AI (Very Hard)"},
 };
-
 char board[8][8];
 
 void printBoard() {
@@ -259,7 +257,6 @@ int checkOccupied(row, col, player, direction) {
     }
 
     if (board[row][col] == x || board[row][col] == o) { //if spot is occupied
-//        printf("This spot is occupied");
         return 2; //throws an occupied error
     } else {
         int found = 0;
@@ -274,36 +271,71 @@ int checkOccupied(row, col, player, direction) {
                     printf("%c\n", board[r][c]);
                     if (board[r][c] == o) { //for player x, check if neighbour is opposite o
                         opposite++; //increment opposite
-
                         checkExtSpot(r, c, row, col, player, direction);
-
                         rounds++;
-//                        if(board[r][c+1] == x){
-//                            printf("Found X at row:%d, col:%d\n", r, c+1);
-//                        }else if(board[r+1][c+1] == x){
-//                            printf("Found X at row:%d, col:%d\n", r+1, c+1);
-//                        }else
-//                            printf("No X found");
                     }
-                } else { //if no spot around is occupied
-//                    continue; //continue to next column
                 }
             }
             if (found == 0) { //at end of row, check if any spot is occupied
                 if (r == row + 1) { //if it is the last row
-//                    printf("No characters around this spot.");
                     return 3; //throws a no spot around given point is a occupied error
                 }
             }
         }
-        printf("\nopposite: %d\n", opposite);
         if (opposite == 0) { //if no neighbour of opposite disc
-//            printf("No opposite disc around this spot");
             return 4; //throws a no neighbour of opposite disc error
         }
     }
-
     return 0;
+}
+
+void humanMove(turn, shape){
+    do {
+        flips = 0;
+        printf("\n");
+        if (occupied == 2) printf("This spot is taken.\n");
+        else if(occupied == 3) printf("No disc around this spot.\n");
+        else if(occupied == 4) printf("No opposite disc around this spot.\n");
+
+        printf("Player %d move: ", turn);
+        scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
+
+        occupied = checkOccupied(playerRow, playerCol, turn);
+
+        flip = 1;
+        checkOccupied(playerRow, playerCol, turn, 0);
+        flip = 0;
+        board[playerRow][playerCol] = shape; //assign x to player's move
+
+        printBoard(); //print updated board
+
+    } while (occupied !=0);
+}
+
+int levelChooser(turn){
+    int player = 1;
+    do {
+        printf("\n");
+        if (player < 1 || player > 4) printf("Level must be between 1 and 4.\n");
+        printf("Choose Level for player %d: ", turn);
+        scanf("%d", &player);
+    } while (player < 1 || player > 4);
+
+    return player;
+}
+
+void initialization(){
+    board[4][4] = 'o';
+    board[4][5] = 'x';
+    board[5][4] = 'x';
+    board[5][5] = 'o';
+
+    printf("\nWelcome To Reversi\n\n");
+
+    for (int i = 0; i < 4; i++) { //printing the levels
+        printf("%s: %s \n", levels[i][0], levels[i][1]);
+    }
+
 }
 
 int main() {
@@ -311,32 +343,10 @@ int main() {
 
     int play = 20;
 
-    board[4][4] = 'o';
-    board[4][5] = 'x';
-    board[5][4] = 'x';
-    board[5][5] = 'o';
+    initialization();
 
-    int player1 = 1, player2 = 1; //define players
-
-    printf("\nWelcome To Reversi\n\n");
-
-    for (int i = 0; i < 5; i++) { //printing the levels
-        printf("%s: %s \n", levels[i][0], levels[i][1]);
-    }
-
-    do {
-        printf("\n");
-        if (player1 < 1 || player1 > 5) printf("Level must be between 1 and 5.\n");
-        printf("Choose Level for player 1: ");
-        scanf("%d", &player1);
-    } while (player1 < 1 || player1 > 5);
-
-    do {
-        printf("\n");
-        if (player2 < 1 || player2 > 5) printf("Level must be between 1 and 5.\n");
-        printf("Choose Level for player 2: ");
-        scanf("%d", &player2);
-    } while (player2 < 1 || player2 > 5);
+    int player1 = levelChooser(1);
+    int player2 = levelChooser(2);
 
 
     printf("\n%s vs %s\n\n", levels[player1 - 1][1], levels[player2 - 1][1]); //displays who vs who
@@ -345,31 +355,17 @@ int main() {
 
     while (play) { //Continue playing until play becomes false.
         flip = 0;
-        printf("Player 1 move: ");
+        maxFlips = 0;
 
         if (player1 == 1) {
-            scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
-
-            if (playerRow == '9') {
-                break;
-            }
-            occupied = checkOccupied(playerRow, playerCol, 1);
-
-            if (occupied != 0) {
-                return occupied;
-            }
-
-            flip = 1;
-            checkOccupied(playerRow, playerCol, 1, 0);
-            flip = 0;
-            board[playerRow][playerCol] = 'x'; //assign x to player's move
-
-            printBoard(); //print updated board
-        } else {
+            humanMove(1, 'x');
+        } else if (player1 == 2) {
+            flips = 0;
             int random = rand() % 4;
-//            int random = 0;
+//            int random = 3;
             printf("random:%d\n", random);
 
+            flip = 1;
             if (random < 2) {
                 for (int r = 1; r < 9; r++) {
                     for (int c = 1; c < 9; c++) {
@@ -380,6 +376,7 @@ int main() {
                         checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 1, 0);
                         if (foundByAi > 0) {
                             board[playerRow][playerCol] = 'x';
+                            printBoard(); //print updated board
                             break;
                         }
                     }
@@ -398,6 +395,7 @@ int main() {
                         if (foundByAi > 0) {
                             printf("playerRow:%d, playerCol:%d\n", playerRow, playerCol);
                             board[playerRow][playerCol] = 'x';
+                            printBoard(); //print updated board
                             break;
                         }
                     }
@@ -406,29 +404,125 @@ int main() {
                     }
                 }
             }
+        } else if (player1 == 3) {
+            flips = 0;
+            int random = rand() % 4;
+//            int random = 3;
+            printf("random:%d\n", random);
 
+            if (random < 2) {
+                for (int r = 1; r < 9; r++) {
+                    for (int c = 1; c < 9; c++) {
+                        printf("before flip: row:%d. col:%d.\n", r, c);
+                        playerRow = random == 0 ? r : c;
+                        playerCol = random == 0 ? c : r;
+                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
+                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 1, 0);
+                        printf("flips:%d\n", flips);
+                        if (flips > maxFlips) {
+                            maxFlips = flips;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        }
+                        flips = 0;
+                    }
+                }
+            } else {
+                for (int r = 8; r > 0; r--) {
+                    for (int c = 8; c > 0; c--) {
+                        printf("before flip: row:%d. col:%d.\n", r, c);
+                        playerRow = random == 2 ? r : c;
+                        playerCol = random == 2 ? c : r;
+                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
+                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 1, random == 2 ? 2 : 1);
+                        if (flips > maxFlips) {
+                            maxFlips = flips;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        }
+                        flips = 0;
+                    }
+                }
+            }
+
+            printf("max flips:%d row:%d col:%d\n", maxFlips, flipRow, flipCol);
+            if (maxFlips > 0) {
+                flip = 1;
+                playerRow = flipRow;
+                playerCol = flipCol;
+                checkOccupied(flipRow, flipCol, 1, 0);
+            }
+            printBoard(); //print updated board
+        } else if (player1 == 4) {
+            flips = 0;
+            int random = rand() % 4;
+//            int random = 1;
+            printf("random:%d\n", random);
+
+            if (random < 2) {
+                for (int r = 1; r < 9; r++) {
+                    for (int c = 1; c < 9; c++) {
+                        printf("before flip: row:%d. col:%d.\n", r, c);
+                        playerRow = random == 0 ? r : c;
+                        playerCol = random == 0 ? c : r;
+                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
+                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 1, 0);
+                        printf("flips:%d\n", flips);
+                        if (flips &&
+                            ((r == 1 && c == 1) || (r == 8 && c == 1) || (r == 1 && c == 8) || (r == 8 && c == 8))) {
+                            printf("edge!!!!!!!!!!!!!!!!!!!!!!!!!!:%d\n");
+                            edge++;
+                            maxFlips++;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        } else if (!edge && flips > maxFlips) {
+                            maxFlips = flips;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        }
+                        flips = 0;
+                    }
+                }
+            } else {
+                for (int r = 8; r > 0; r--) {
+                    for (int c = 8; c > 0; c--) {
+                        printf("before flip: row:%d. col:%d.\n", r, c);
+                        playerRow = random == 2 ? r : c;
+                        playerCol = random == 2 ? c : r;
+                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
+                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 1, random == 2 ? 2 : 1);
+                        printf("flips!!!!!!!!!!!!!!!!!!!!!!!!!!:%d\n", flips);
+                        if (flips &&
+                            ((r == 1 && c == 1) || (r == 8 && c == 1) || (r == 1 && c == 8) || (r == 8 && c == 8))) {
+                            printf("edge!!!!!!!!!!!!!!!!!!!!!!!!!!:\n");
+                            edge++;
+                            maxFlips++;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        } else if (!edge && flips > maxFlips) {
+                            maxFlips = flips;
+                            flipRow = playerRow;
+                            flipCol = playerCol;
+                        }
+                        flips = 0;
+                    }
+                }
+            }
+
+            printf("max flips:%d row:%d col:%d\n", maxFlips, flipRow, flipCol);
+            if (maxFlips > 0) {
+                flip = 1;
+                playerRow = flipRow;
+                playerCol = flipCol;
+                checkOccupied(flipRow, flipCol, 1, 0);
+            }
             printBoard(); //print updated board
         }
-
-        printf("Player 2 move: ");
 
         foundByAi = 0;
 
         if (player2 == 1) {
-            scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
-
-            if (playerRow == '9') {
-                break;
-            }
-            occupied = checkOccupied(playerRow, playerCol, 2);
-
-            if (occupied != 0) {
-                return occupied;
-            }
-
-            board[playerRow][playerCol] = 'o'; //assign x to player's move
-
-            printBoard(); //print updated board
+            humanMove(2, 'o');
         } else if (player2 == 2) {
             flips = 0;
             int random = rand() % 4;
@@ -588,6 +682,8 @@ int main() {
             }
             printBoard(); //print updated board
         }
+
+
         foundByAi = 0;
         play--;
     }
