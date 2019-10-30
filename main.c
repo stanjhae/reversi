@@ -301,6 +301,7 @@ void humanMove(turn, shape){
         scanf("%d, %d", &playerRow, &playerCol); //getting the player's move (row,col)
 
         occupied = checkOccupied(playerRow, playerCol, turn);
+        if(occupied != 0) continue;
 
         flip = 1;
         checkOccupied(playerRow, playerCol, turn, 0);
@@ -335,7 +336,66 @@ void initialization(){
     for (int i = 0; i < 4; i++) { //printing the levels
         printf("%s: %s \n", levels[i][0], levels[i][1]);
     }
+}
 
+int AIMove(random, r, c, level, disc){
+    int dir;
+    if(random == 0 || random == 1) dir = 0;
+    else if(random == 2) dir = 2;
+    else dir = 1;
+
+    playerRow = !(random % 2) ? r : c;
+    playerCol = !(random % 2) ? c : r;
+
+    checkOccupied(!(random % 2) ? r : c, !(random % 2) ? c : r, 1, dir);
+    if (foundByAi > 0 && level == 2) {
+        board[playerRow][playerCol] = disc;
+        printBoard(); //print updated board
+        return 5;
+    }
+
+    if (level == 4 && flips &&
+        ((r == 1 && c == 1) || (r == 8 && c == 1) || (r == 1 && c == 8) || (r == 8 && c == 8))) {
+        edge++;
+        maxFlips++;
+        flipRow = playerRow;
+        flipCol = playerCol;
+    } else if (!edge && flips > maxFlips) {
+        maxFlips = flips;
+        flipRow = playerRow;
+        flipCol = playerCol;
+    }
+    flips = 0;
+}
+
+void level2Ai(random, player, disc){
+    flip = 1;
+    int found = 0;
+    if (random < 2) {
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                found = AIMove(random, r, c, player, disc);
+                if(found == 5) {
+                    break;
+                }
+            }
+            if (found == 5) {
+                break;
+            }
+        }
+    } else {
+        for (int r = 8; r > 0; r--) {
+            for (int c = 8; c > 0; c--) {
+                found = AIMove(random, r, c, player, disc);
+                if(found == 5) {
+                    break;
+                }
+            }
+            if (found == 5) {
+                break;
+            }
+        }
+    }
 }
 
 int main() {
@@ -348,7 +408,6 @@ int main() {
     int player1 = levelChooser(1);
     int player2 = levelChooser(2);
 
-
     printf("\n%s vs %s\n\n", levels[player1 - 1][1], levels[player2 - 1][1]); //displays who vs who
 
     printBoard();
@@ -356,160 +415,52 @@ int main() {
     while (play) { //Continue playing until play becomes false.
         flip = 0;
         maxFlips = 0;
+        int found = 0;
+        edge = 0;
+
+        int random = rand() % 4;
+        flips = 0;
 
         if (player1 == 1) {
             humanMove(1, 'x');
         } else if (player1 == 2) {
-            flips = 0;
-            int random = rand() % 4;
-//            int random = 3;
-            printf("random:%d\n", random);
-
-            flip = 1;
-            if (random < 2) {
-                for (int r = 1; r < 9; r++) {
-                    for (int c = 1; c < 9; c++) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 0 ? r : c;
-                        playerCol = random == 0 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
-                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 1, 0);
-                        if (foundByAi > 0) {
-                            board[playerRow][playerCol] = 'x';
-                            printBoard(); //print updated board
-                            break;
-                        }
-                    }
-                    if (foundByAi != 0) {
-                        break;
-                    }
-                }
-            } else {
-                for (int r = 8; r > 0; r--) {
-                    for (int c = 8; c > 0; c--) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 2 ? r : c;
-                        playerCol = random == 2 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
-                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 1, random == 2 ? 2 : 1);
-                        if (foundByAi > 0) {
-                            printf("playerRow:%d, playerCol:%d\n", playerRow, playerCol);
-                            board[playerRow][playerCol] = 'x';
-                            printBoard(); //print updated board
-                            break;
-                        }
-                    }
-                    if (foundByAi != 0) {
-                        break;
-                    }
-                }
-            }
+            level2Ai(random, player1, 'x');
         } else if (player1 == 3) {
-            flips = 0;
-            int random = rand() % 4;
-//            int random = 3;
-            printf("random:%d\n", random);
-
+            printf("random :%d.\n", random);
             if (random < 2) {
                 for (int r = 1; r < 9; r++) {
                     for (int c = 1; c < 9; c++) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 0 ? r : c;
-                        playerCol = random == 0 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
-                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 1, 0);
-                        printf("flips:%d\n", flips);
-                        if (flips > maxFlips) {
-                            maxFlips = flips;
-                            flipRow = playerRow;
-                            flipCol = playerCol;
-                        }
-                        flips = 0;
+                        AIMove(random, r, c, player1, 'x');
                     }
                 }
             } else {
                 for (int r = 8; r > 0; r--) {
                     for (int c = 8; c > 0; c--) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 2 ? r : c;
-                        playerCol = random == 2 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
-                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 1, random == 2 ? 2 : 1);
-                        if (flips > maxFlips) {
-                            maxFlips = flips;
-                            flipRow = playerRow;
-                            flipCol = playerCol;
-                        }
-                        flips = 0;
+                        AIMove(random, r, c, player1, 'x');
                     }
                 }
             }
-
-            printf("max flips:%d row:%d col:%d\n", maxFlips, flipRow, flipCol);
             if (maxFlips > 0) {
                 flip = 1;
                 playerRow = flipRow;
                 playerCol = flipCol;
                 checkOccupied(flipRow, flipCol, 1, 0);
             }
-            printBoard(); //print updated board
+            printBoard();
         } else if (player1 == 4) {
-            flips = 0;
-            int random = rand() % 4;
-//            int random = 1;
-            printf("random:%d\n", random);
-
             if (random < 2) {
                 for (int r = 1; r < 9; r++) {
                     for (int c = 1; c < 9; c++) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 0 ? r : c;
-                        playerCol = random == 0 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
-                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 1, 0);
-                        printf("flips:%d\n", flips);
-                        if (flips &&
-                            ((r == 1 && c == 1) || (r == 8 && c == 1) || (r == 1 && c == 8) || (r == 8 && c == 8))) {
-                            printf("edge!!!!!!!!!!!!!!!!!!!!!!!!!!:%d\n");
-                            edge++;
-                            maxFlips++;
-                            flipRow = playerRow;
-                            flipCol = playerCol;
-                        } else if (!edge && flips > maxFlips) {
-                            maxFlips = flips;
-                            flipRow = playerRow;
-                            flipCol = playerCol;
-                        }
-                        flips = 0;
+                        AIMove(random, r, c, player1, 'x');
                     }
                 }
             } else {
                 for (int r = 8; r > 0; r--) {
                     for (int c = 8; c > 0; c--) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 2 ? r : c;
-                        playerCol = random == 2 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
-                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 1, random == 2 ? 2 : 1);
-                        printf("flips!!!!!!!!!!!!!!!!!!!!!!!!!!:%d\n", flips);
-                        if (flips &&
-                            ((r == 1 && c == 1) || (r == 8 && c == 1) || (r == 1 && c == 8) || (r == 8 && c == 8))) {
-                            printf("edge!!!!!!!!!!!!!!!!!!!!!!!!!!:\n");
-                            edge++;
-                            maxFlips++;
-                            flipRow = playerRow;
-                            flipCol = playerCol;
-                        } else if (!edge && flips > maxFlips) {
-                            maxFlips = flips;
-                            flipRow = playerRow;
-                            flipCol = playerCol;
-                        }
-                        flips = 0;
+                        AIMove(random, r, c, player1, 'x');
                     }
                 }
             }
-
-            printf("max flips:%d row:%d col:%d\n", maxFlips, flipRow, flipCol);
             if (maxFlips > 0) {
                 flip = 1;
                 playerRow = flipRow;
@@ -520,60 +471,40 @@ int main() {
         }
 
         foundByAi = 0;
+        random = rand() % 4;
+        flips = 0;
 
         if (player2 == 1) {
             humanMove(2, 'o');
         } else if (player2 == 2) {
-            flips = 0;
-            int random = rand() % 4;
-//            int random = 3;
-            printf("random:%d\n", random);
-
             flip = 1;
             if (random < 2) {
                 for (int r = 1; r < 9; r++) {
                     for (int c = 1; c < 9; c++) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 0 ? r : c;
-                        playerCol = random == 0 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 0 ? r : c, random == 0 ? c : r);
-                        checkOccupied(random == 0 ? r : c, random == 0 ? c : r, 2, 0);
-                        if (foundByAi > 0) {
-                            board[playerRow][playerCol] = 'o';
-                            printBoard(); //print updated board
+                        found = AIMove(random, r, c, player2, 'o');
+                        if(found == 5) {
                             break;
                         }
                     }
-                    if (foundByAi != 0) {
+                    if (found == 5) {
                         break;
                     }
                 }
             } else {
                 for (int r = 8; r > 0; r--) {
                     for (int c = 8; c > 0; c--) {
-                        printf("before flip: row:%d. col:%d.\n", r, c);
-                        playerRow = random == 2 ? r : c;
-                        playerCol = random == 2 ? c : r;
-                        printf("after flip: row:%d. col:%d.\n\n", random == 2 ? r : c, random == 2 ? c : r);
-                        checkOccupied(random == 2 ? r : c, random == 2 ? c : r, 2, random == 2 ? 2 : 1);
-                        if (foundByAi > 0) {
-                            printf("playerRow:%d, playerCol:%d\n", playerRow, playerCol);
-                            board[playerRow][playerCol] = 'o';
-                            printBoard(); //print updated board
+                        found = AIMove(random, r, c, player2, 'o');
+                        if(found == 5) {
                             break;
                         }
                     }
-                    if (foundByAi != 0) {
+                    if (found == 5) {
                         break;
                     }
+
                 }
             }
         } else if (player2 == 3) {
-            flips = 0;
-            int random = rand() % 4;
-//            int random = 3;
-            printf("random:%d\n", random);
-
             if (random < 2) {
                 for (int r = 1; r < 9; r++) {
                     for (int c = 1; c < 9; c++) {
@@ -618,11 +549,6 @@ int main() {
             }
             printBoard(); //print updated board
         } else if (player2 == 4) {
-            flips = 0;
-            int random = rand() % 4;
-//            int random = 1;
-            printf("random:%d\n", random);
-
             if (random < 2) {
                 for (int r = 1; r < 9; r++) {
                     for (int c = 1; c < 9; c++) {
