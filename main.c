@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-int playerRow = 0, playerCol = 0, occupied = 0, foundByAi = 0, flips = 0, maxFlips = 0, flipRow, flipCol, badRow, badCol, badFlips=0, flip = 0, edge = 0, hasFlipped=0, play=1;
+int playerRow = 0, playerCol = 0, occupied = 0, foundByAi = 0, flips = 0, maxFlips = 0, flipRow, flipCol;
+int badRow, badCol, badFlips=0, flip = 0, edge = 0, hasFlipped=0, play=1, x = 0, o = 0;
 
 void *levels[5][2] = { //levels for the game
         {"1", "Human"},
@@ -13,7 +14,7 @@ void *levels[5][2] = { //levels for the game
 char board[9][9];
 
 void printBoard() {
-    int x = 0, o = 0; //number of x and o
+    x = 0, o = 0; //number of x and o
 
     for (int row = 0; row < 9; row++) {
         if (row != 0) { //if first row do not print number of row.
@@ -318,12 +319,12 @@ int AIMove(random, r, c, level, turn, disc){
         maxFlips = flips;
         flipRow = playerRow;
         flipCol = playerCol;
-    }
-    //    else if (level == 4 && !edge && (((r == 2 || r == 7)) || ((c == 2 || c == 7)))){
-//        badFlips = flips;
-//        badRow = playerRow;
-//        badCol = playerCol;
-//    }
+    }else if (level == 4 && !edge && (((r == 2 || r == 7)) || ((c == 2 || c == 7)))){
+        badFlips = flips;
+        badRow = playerRow;
+        badCol = playerCol;
+    }2
+    \
 
     flips = 0;
 }
@@ -391,33 +392,32 @@ void level3And4Ai(random, player, turn, disc){
 }
 
 int main() {
-    srand(time(0));   // Initialization, should only be called once.
+    srand(time(0));
 
-    initialization();
+    initialization(); //initializes the board and prints the levels.
 
-    int player1 = levelChooser(1);
-    int player2 = levelChooser(2);
+    int player1 = levelChooser(1); //choose level
+    int player2 = levelChooser(2); //choose level
 
     printf("\n%s vs %s\n\n", levels[player1 - 1][1], levels[player2 - 1][1]); //displays who vs who
 
-    printBoard();
+    printBoard(); //print board
 
-    while (play) { //Continue playing until play becomes false.
+    while (play) { //Continue playing until no move available
 
-        int random = rand() % 4;
-        flip = 0;
-        maxFlips = 0;
-        badFlips = 0;
-        edge = 0;
-        foundByAi = 0;
-        flips = 0;
-        hasFlipped=0;
+        int random = rand() % 4; //generate random value.
+        flip = 0; //Flag to enable or disable flip
+        maxFlips = 0; //Maximum number of flips possible
+        badFlips = 0; //Maximum number of flips possible in restricted area
+        edge = 0; //Check if an edge can be played
+        foundByAi = 0; //Check if any disc can be flipped
+        flips = 0; //number of flips possible
+        hasFlipped=0; //Check if we playes successfully
 
         if (player1 == 1) {
-            humanMove(1, 'x');
+            if(x+o != 64) humanMove(1, 'x');
         } else if (player1 == 2) {
             level2Ai(random, player1, 1, 'x');
-
         } else if (player1 == 3) {
             level3And4Ai(random, player1, 1, 'x');
         } else if (player1 == 4) {
@@ -433,7 +433,7 @@ int main() {
         flips = 0;
 
         if (player2 == 1) {
-            humanMove(2, 'o');
+            if(x+o != 64) humanMove(2, 'o');
         } else if (player2 == 2) {
             level2Ai(random, player2, 2, 'o');
         } else if (player2 == 3) {
